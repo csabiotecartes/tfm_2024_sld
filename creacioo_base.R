@@ -5,20 +5,20 @@ DB_SERVER <- 'synw-aquas.sql.azuresynapse.net'
 DB_DATABASE <- 'aquas'
 DB_USERNAME <- 'clara.sabiote@aquas.cat'
 
-# Crear connexiÛ ODBC
+# Crear connexi√≥ ODBC
 conn <- dbConnect(odbc::odbc(), .connection_string = paste0('Driver={ODBC Driver 17 for SQL Server};Server=',DB_SERVER,';Port=1433;Database=',DB_DATABASE,';Uid=',DB_USERNAME, ';Authentication=ActiveDirectoryInteractive'), timeout = 10)
 
-# FunciÛ per obtenir les taules disponibles pels investigadors 
+# Funci√≥ per obtenir les taules disponibles pels investigadors 
 get_all_inv_tables <- function(){
   result<-dbGetQuery(conn, "SELECT v.name FROM sys.views as v WHERE OBJECT_SCHEMA_NAME(v.object_id) = 'z_inv'")
   return(result$name)
 }
 
-# Executa la funciÛ
+# Executa la funci√≥
 tables = get_all_inv_tables()
 tables
 
-# FunciÛ per llegir una taula
+# Funci√≥ per llegir una taula
 get_inv_table <- function(tableName){
   result<-dbGetQuery(conn, paste0("SELECT * FROM [z_inv].[",  tableName, "]"))
   return(result)
@@ -71,10 +71,10 @@ sld <- sld %>%
 sld <- sld %>%
   mutate(diagnostic = if_else(IdCas %in% dx$IdCas, 1, 0))
 
-# Any diagnÚstic
-# Pels grups amb dx aixÚ ser‡ molt f‡cil.
-# Pel grup masld_s la data de dx ser‡ la data amb el 1r hsi alterat,
-# pel grup ald_s la data de dx ser‡ la data de consum d'oh de risc
+# Any diagn√≤stic
+# Pels grups amb dx aix√≤ ser√† molt f√†cil.
+# Pel grup masld_s la data de dx ser√† la data amb el 1r hsi alterat,
+# pel grup ald_s la data de dx ser√† la data de consum d'oh de risc
 
 c_cex = get_inv_table("935_cohort_cmbd_aea")
 c_cap = get_inv_table("935_cohort_redics_problemessalut")
@@ -105,7 +105,7 @@ c_dx_masld_cex <- c_cex %>%
            dx_secundari_13_c == 'K7581' | dx_secundari_13_c == 'K760' |
            dx_secundari_14_c == 'K7581' | dx_secundari_14_c == 'K760')
 
-# Agafarem preferentment la data de diagnÚstic del cap, en el seu defecte
+# Agafarem preferentment la data de diagn√≤stic del cap, en el seu defecte
 # la de cex
 # Primer ordenem per pacient i ens quedem amb la primera data de dx 
 
@@ -164,7 +164,7 @@ c_dx_ald_cex <- c_cex %>%
            str_detect(dx_secundari_14_c, 'K70') )
 
 
-# Agafarem preferentment la data de diagnÚstic del cap, en el seu defecte
+# Agafarem preferentment la data de diagn√≤stic del cap, en el seu defecte
 # la de cex
 # Primer ordenem per pacient i ens quedem amb la primera data de dx 
 
@@ -284,12 +284,12 @@ taula_sld <- taula_sld %>%
 
 rm(c_oh, oh_data_dx, oh_info)
 
-# Mesures antropomËtriques
+# Mesures antropom√®triques
 imc <- c_oh_imc %>%
   filter(VU_COD_VS == 'TT101' | VU_COD_VS == 'TT102' | VU_COD_VS == 'TT103')
 
-# FunciÛ que enganxa les dates de dx dels pacients a les taules i selecciona
-# l'observaciÛ mÈs propera a aquesta
+# Funci√≥ que enganxa les dates de dx dels pacients a les taules i selecciona
+# l'observaci√≥ m√©s propera a aquesta
 obs_propera_dx <- function(df, data_obs) {
   df <- df %>%
     left_join(taula_dates_dx, by = "IdCas")
@@ -353,7 +353,7 @@ rm(pes, talla, imc)
 
 # Afegir FRCV
 
-# Dx sobrepËs i obesitat
+# Dx sobrep√®s i obesitat
 ob_cap <- c_cap %>% 
   filter(str_detect(problema_salut_c, 'E66')) %>%
   select(IdCas, data_problema_salut) %>%
@@ -494,17 +494,17 @@ taula_sld <- taula_sld %>%
 rm(ob_dx, dm2_dx, hta_dx, dlp_dx)
 
 
-# AtenciÛ hospitalaria aguts
+# Atenci√≥ hospitalaria aguts
 c_ah = get_inv_table("935_cohort_cmbd_ah")
-# UrgËncies
+# Urg√®ncies
 c_urg = get_inv_table("935_cohort_cmbd_urgencies") 
 
 
 
 # Dataframe amb totes les malalties cardiovasculars 
 
-# FarÈ una funciÛ que busqui un dx als 4 dataframes (cap, cex, urg i ah)
-# per a que sigui mÈs r‡pid
+# Far√© una funci√≥ que busqui un dx als 4 dataframes (cap, cex, urg i ah)
+# per a que sigui m√©s r√†pid
 buscar_cap_cex_urg_ah <- function(...) {
   
   dxs <- list(...)
@@ -565,7 +565,7 @@ mcv_pre_dx <- mcv_dx_dates_dx %>%
 mcv_post_dx <- mcv_dx_dates_dx %>%
   filter(dif_m_dx > 0)
 
-# Un cop tinc els pacients que tenen mcv abans i desprÈs ho enganxo a la taula_sld
+# Un cop tinc els pacients que tenen mcv abans i despr√©s ho enganxo a la taula_sld
 
 mcv_pre_dx <- mcv_pre_dx %>%
   group_by(IdCas) %>%
@@ -599,7 +599,7 @@ taula_sld <- taula_sld %>%
 
 rm(mcv_dx, mcv_dx_dates_dx, mcv_pre_dx, mcv_post_dx)
 
-# FarÈ el mateix amb les descompensacions
+# Far√© el mateix amb les descompensacions
 descomp_dx <- buscar_cap_cex_urg_ah('K7682', 'R18', 'I85', 'K652', 
                                     'C228', 'K922', 'K767')
 descomp_dx_dates_dx <- descomp_dx %>%
@@ -648,7 +648,7 @@ taula_sld <- taula_sld %>%
 
 rm(descomp_dx, descomp_dx_dates_dx, descomp_pre_dx, descomp_post_dx)
 
-# HipertensiÛ portal
+# Hipertensi√≥ portal
 htp_dx <- buscar_cap_cex_urg_ah('K766', 'R161')
 
 htp_dx_dates_dx   <- htp_dx %>%
@@ -696,7 +696,7 @@ taula_sld <- taula_sld %>%
 
 rm(htp_dx, htp_dx_dates_dx, htp_pre_dx, htp_post_dx)
 
-# Transplantament hep‡tic
+# Transplantament hep√†tic
 tx_dx <- buscar_cap_cex_urg_ah('Z944')
 
 tx_dx_dates_dx   <- tx_dx %>%
@@ -750,7 +750,7 @@ c_rca = get_inv_table("935_cohort_rca")
 #c_reg_mort = get_inv_table("935_cohort_registre_mortalitat")
 
 defuncions <- c_rca %>%
-  filter(situacio_assegurat == 'DefunciÛ') %>%
+  filter(situacio_assegurat == 'Defunci√≥') %>%
   select(IdCas, data_defuncio)
 
 taula_sld <- taula_sld %>%
@@ -762,10 +762,10 @@ taula_sld <- taula_sld %>%
 rm(defuncions)
 rm(c_cap, c_cex, c_ah, c_urg, c_oh_imc, c_rca, c_sociodemo)
 
-# Valors analÌtics basals i fib4
+# Valors anal√≠tics basals i fib4
 
 
-# Funcio per seleccionar un par‡metre, seleccionar el valor mÈs proper al dx i
+# Funcio per seleccionar un par√†metre, seleccionar el valor m√©s proper al dx i
 # obtenir un dataframe llest per enganxar a taula_sld
 
 buscar_prova_lab <- function(codi, taula){
@@ -787,7 +787,7 @@ buscar_prova_lab <- function(codi, taula){
     select(IdCas, lab_resultat, data_visita) %>%
     rename(data_prova = data_visita) %>%
     rename(valor = lab_resultat)
-  prova$valor <- gsub(",", ".", prova$valor) # reemplaÁar coma per punt decimal
+  prova$valor <- gsub(",", ".", prova$valor) # reempla√ßar coma per punt decimal
   prova$valor <- as.numeric(prova$valor)
   return(prova)
 }
@@ -806,7 +806,7 @@ colesterol <- colesterol %>%
   rename(data_col = data_prova) %>%
   rename(col = valor)
 
-# TriglicËrids
+# Triglic√®rids
 triglicerids <- buscar_prova_lab('Q53585', c_lab1)
 triglicerids <- triglicerids %>%
   rename(data_tgc = data_prova) %>%
@@ -864,7 +864,7 @@ bilirrubina <- bilirrubina %>%
   rename(data_bili = data_prova) %>%
   rename(bili = valor)
 
-# Alb˙mina
+# Alb√∫mina
 albumina <- buscar_prova_lab('Q02485', c_lab2)
 albumina <- albumina %>%
   rename(data_alb = data_prova) %>%
@@ -993,15 +993,15 @@ mena <- c(4, 12, 682, 818, 887, 364, 368, 376, 400, 414, 422, 504, 478, 275, 732
 
 taula_sld <- taula_sld %>%
   mutate(regio_global = case_when(
-    nacionalitat_c %in% africa_sub ~ "¿frica subsahariana",
-    nacionalitat_c %in% america_llatina ~ "AmËrica llatina",
-    nacionalitat_c %in% america_nord ~ "AmËrica del nord",
-    nacionalitat_c %in% asia_central ~ "¿sia central",
-    nacionalitat_c %in% asia_pacific ~ "¿sia pacÌfic",
-    nacionalitat_c %in% asia_sud ~ "¿sia sud", 
-    nacionalitat_c == 156 ~ "¿sia est",
-    nacionalitat_c %in% asia_sud_est ~ "¿sia sud-est",
-    nacionalitat_c %in% australasia ~ "Austral‡sia", 
+    nacionalitat_c %in% africa_sub ~ "√Äfrica subsahariana",
+    nacionalitat_c %in% america_llatina ~ "Am√®rica llatina",
+    nacionalitat_c %in% america_nord ~ "Am√®rica del nord",
+    nacionalitat_c %in% asia_central ~ "√Äsia central",
+    nacionalitat_c %in% asia_pacific ~ "√Äsia pac√≠fic",
+    nacionalitat_c %in% asia_sud ~ "√Äsia sud", 
+    nacionalitat_c == 156 ~ "√Äsia est",
+    nacionalitat_c %in% asia_sud_est ~ "√Äsia sud-est",
+    nacionalitat_c %in% australasia ~ "Austral√†sia", 
     nacionalitat_c %in% europa_est ~ "Europa est", 
     nacionalitat_c %in% europa_oest ~ "Europa oest",
     nacionalitat_c %in% mena ~ "MENA"
@@ -1015,14 +1015,14 @@ taula_sld <- taula_sld %>%
   mutate(ast = case_when(
     ast > 1500 ~ NA_real_,
     ast < 10 ~ NA_real_,
-    TRUE ~ ast #mantenir els valors que no compleixen cap condiciÛ
+    TRUE ~ ast #mantenir els valors que no compleixen cap condici√≥
 
   ))
 taula_sld <- taula_sld %>%
   mutate(alt = case_when(
     alt > 1500 ~ NA_real_,
     alt < 10 ~ NA_real_,
-    TRUE ~ alt #mantenir els valors que no compleixen cap condiciÛ
+    TRUE ~ alt #mantenir els valors que no compleixen cap condici√≥
     
   ))
 
